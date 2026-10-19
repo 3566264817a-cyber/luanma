@@ -1,0 +1,22 @@
+[project]
+name = "luanma"
+version = "0.1.0"
+description = "中日韩文乱码自动修复 — the ftfy for CJK mojibake"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = []
+
+[project.scripts]
+luanma = "luanma.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/3566264817a-cyber/luanma"
+Demo = "https://3566264817a-cyber.github.io/luanma/"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["luanma"]

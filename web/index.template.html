@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>luanma · 乱码克星 — CJK mojibake fixer</title>
+<meta name="description" content="Fix Chinese / Japanese / Korean mojibake (乱码 / 文字化け / 깨진 글자) in your browser. Offline, nothing uploaded.">
+<style>
+  :root { --bg:#fafaf9; --fg:#1c1917; --mut:#78716c; --card:#fff; --line:#e7e5e4; --acc:#2563eb; --ok:#15803d; --warn:#b45309; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#1c1917; --fg:#f5f5f4; --mut:#a8a29e; --card:#292524; --line:#44403c; --acc:#60a5fa; --ok:#4ade80; --warn:#fbbf24; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui,-apple-system,"Segoe UI","PingFang SC","Hiragino Sans","Microsoft YaHei","Malgun Gothic",sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 28px 18px 60px; }
+  header { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; }
+  h1 { font-size: 26px; margin: 0; }
+  h1 small { font-size: 15px; color: var(--mut); font-weight: 400; margin-left: 8px; }
+  .langs button { background:none; border:1px solid var(--line); color:var(--fg); border-radius:6px; padding:3px 9px; cursor:pointer; font-size:14px; }
+  .langs button.on { border-color: var(--acc); color: var(--acc); }
+  p.sub { color: var(--mut); margin: 6px 0 18px; }
+  label { font-weight: 600; font-size: 14px; display:flex; justify-content:space-between; align-items:center; margin: 14px 0 6px; }
+  textarea { width:100%; min-height:130px; padding:12px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--fg); font: 16px/1.6 inherit; font-family: inherit; resize: vertical; }
+  textarea:focus { outline: 2px solid var(--acc); border-color: transparent; }
+  #out { background: var(--card); }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .chip { border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:999px; padding:3px 11px; font-size:13px; cursor:pointer; }
+  .chip:hover, .btn:hover { border-color: var(--acc); }
+  .btn { border:1px solid var(--line); background:var(--card); color:var(--fg); border-radius:8px; padding:4px 12px; font-size:13px; cursor:pointer; font-weight:400; }
+  #explain { margin-top: 10px; padding: 12px 14px; border-left: 3px solid var(--line); background: var(--card); border-radius: 0 8px 8px 0; font-size: 14px; white-space: pre-wrap; min-height: 1.6em; }
+  #explain.ok { border-color: var(--ok); } #explain.warn { border-color: var(--warn); }
+  #drop { margin-top: 18px; border: 2px dashed var(--line); border-radius: 10px; padding: 14px; text-align: center; color: var(--mut); font-size: 14px; cursor: pointer; }
+  #drop.over { border-color: var(--acc); color: var(--acc); }
+  footer { margin-top: 34px; color: var(--mut); font-size: 13px; }
+  a { color: var(--acc); }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>luanma <small data-i18n="tagline"></small></h1>
+    <div class="langs"><button data-l="zh">中文</button> <button data-l="en">EN</button> <button data-l="ja">日本語</button></div>
+  </header>
+  <p class="sub" data-i18n="sub"></p>
+
+  <label for="in"><span data-i18n="input"></span>
+    <span class="row"><button class="btn" id="clear" data-i18n="clear"></button></span></label>
+  <textarea id="in" spellcheck="false" autofocus></textarea>
+  <div class="row" style="margin-top:8px"><span style="font-size:13px;color:var(--mut)" data-i18n="examples"></span><span id="examples" class="row"></span></div>
+
+  <label for="out"><span data-i18n="output"></span>
+    <span class="row"><button class="btn" id="copy" data-i18n="copy"></button><button class="btn hidden" id="download" data-i18n="download"></button></span></label>
+  <textarea id="out" readonly spellcheck="false"></textarea>
+  <div id="explain"></div>
+
+  <div id="drop" data-i18n="drop"></div>
+  <input type="file" id="file" class="hidden">
+
+  <footer>
+    <span data-i18n="privacy"></span> ·
+    <a href="https://github.com/__REPO__">GitHub</a> ·
+    <code>pip install luanma</code> · v__VERSION__
+  </footer>
+</main>
+
+<script>globalThis.LUANMA_DATA = __DATA__;</script>
+<script>
+__LUANMA_JS__
+</script>
+<script>
+(function () {
+  const T = {
+    zh: { tagline: "乱码克星", sub: "把「鏂囦欢」「æ–‡ä»¶」「╬─╝■」这类中日韩乱码还原成原文。自动识别出错的编码路径，支持多层乱码，并能推测部分已丢失的字节。",
+      input: "粘贴乱码", output: "还原结果", clear: "清空", copy: "复制", copied: "已复制", download: "下载 UTF-8 文件", examples: "试试：",
+      drop: "或把乱码文件拖到这里（.txt / .csv / .srt …），自动识别编码并修复", privacy: "全部在你的浏览器本地运行，不上传任何内容",
+      step: (a, b) => `${a} 编码的内容被当成 ${b} 解码`, nth: (i) => `第${i}次出错：`, guessed: (n) => `有 ${n} 个字节已丢失，已按常用字频率推测补回（请核对）`,
+      lost: (n) => `有 ${n} 个字符永久丢失，用 � 标出`, conf: (c, a, b) => `可信度约 ${c}%（评分 ${a} → ${b}）`, clean: "文本看起来正常，未做修改。",
+      none: "没找到可靠的还原方式，原样保留。", pieces: (n) => `按片段修复了 ${n} 处乱码`, file: (n, e) => `文件「${n}」按 ${e} 读取`,
+      kunjinkao: "「锟斤拷」：GBK 内容曾被当作 UTF-8 读取并保存，原始字节已被替换，丢失部分无法恢复。",
+      tangtang: "「烫烫烫/屯屯屯」不是乱码：这是 VC++ 调试模式下未初始化的内存（0xCC / 0xCD）。" },
+    en: { tagline: "CJK mojibake fixer", sub: "Turns garbled Chinese / Japanese / Korean text (“æ–‡ä»¶”, “鏂囦欢”, “╬─╝■”) back into the original. Finds the chain of wrong decodings automatically, including multi-layer mojibake and lost bytes.",
+      input: "Paste garbled text", output: "Fixed text", clear: "Clear", copy: "Copy", copied: "Copied", download: "Download as UTF-8", examples: "Try:",
+      drop: "Or drop a garbled file here (.txt / .csv / .srt …) — encoding is detected and fixed", privacy: "Runs entirely in your browser. Nothing is uploaded",
+      step: (a, b) => `${a} bytes were decoded as ${b}`, nth: (i) => `Error ${i}: `, guessed: (n) => `${n} lost byte(s) were guessed from character frequency (please double-check)`,
+      lost: (n) => `${n} character(s) are permanently lost (shown as �)`, conf: (c, a, b) => `Confidence ≈ ${c}% (score ${a} → ${b})`, clean: "Text looks fine — nothing changed.",
+      none: "No reliable fix found; text left unchanged.", pieces: (n) => `Fixed ${n} garbled fragment(s)`, file: (n, e) => `File "${n}" read as ${e}`,
+      kunjinkao: "\"锟斤拷\": GBK text was once read as UTF-8 and saved; the original bytes were replaced and cannot be recovered.",
+      tangtang: "\"烫烫烫 / 屯屯屯\" is not mojibake: it is uninitialised memory (0xCC / 0xCD) in MSVC debug builds." },
+    ja: { tagline: "文字化け修復", sub: "「縺薙ｓ縺ｫ縺｡縺ｯ」「ã“ã‚“」のような日中韓の文字化けを元の文字に戻します。誤変換の経路を自動で特定し、多重の文字化けや欠落バイトの推測にも対応。",
+      input: "文字化けしたテキストを貼り付け", output: "修復結果", clear: "クリア", copy: "コピー", copied: "コピーしました", download: "UTF-8 で保存", examples: "例：",
+      drop: "または文字化けしたファイルをここにドロップ（.txt / .csv / .srt …）", privacy: "すべてブラウザ内で処理され、何も送信されません",
+      step: (a, b) => `${a} のデータが ${b} として読み込まれた`, nth: (i) => `誤り${i}：`, guessed: (n) => `失われた ${n} バイトを文字頻度から推測して補完（要確認）`,
+      lost: (n) => `${n} 文字は完全に失われています（� で表示）`, conf: (c, a, b) => `信頼度 約${c}%（スコア ${a} → ${b}）`, clean: "正常なテキストのようです。変更なし。",
+      none: "確実な修復方法が見つからないため、そのままにしました。", pieces: (n) => `${n} か所の文字化けを部分的に修復`, file: (n, e) => `ファイル「${n}」を ${e} として読み込み`,
+      kunjinkao: "「锟斤拷」：GBK のデータが UTF-8 として読まれて保存されたもので、失われた部分は復元できません。",
+      tangtang: "「烫烫烫／屯屯屯」は文字化けではなく、MSVC デバッグビルドの未初期化メモリ（0xCC / 0xCD）です。" },
+  };
+  const EXAMPLES = __EXAMPLES__;
+  const $ = (id) => document.getElementById(id);
+  let lang = localStorage.getItem("luanma-lang") || (navigator.language || "zh").slice(0, 2);
+  if (!T[lang]) lang = "en";
+  let fileName = null;
+
+  function setLang(l) {
+    lang = l; localStorage.setItem("luanma-lang", l);
+    document.documentElement.lang = { zh: "zh-CN", en: "en", ja: "ja" }[l];
+    document.querySelectorAll("[data-i18n]").forEach((e) => { e.textContent = T[l][e.dataset.i18n]; });
+    document.querySelectorAll(".langs button").forEach((b) => b.classList.toggle("on", b.dataset.l === l));
+    run();
+  }
+  function explain(r, extra) {
+    const t = T[lang], lines = extra ? [extra] : [];
+    if (!r.changed) {
+      lines.push(r.note && t[r.note] ? t[r.note] : r.before < 1 && luanma.suspicious(r.text) ? t.none : t.clean);
+      return [lines.join("\n"), r.note ? "warn" : ""];
+    }
+    r.steps.slice().reverse().forEach((s, i) => lines.push(t.nth(i + 1) + t.step(luanma.LABEL[s.original], luanma.LABEL[s.shownAs])));
+    if (r.note === "pieces") lines.push(t.pieces(r.pieces));
+    if (r.guessed) lines.push(t.guessed(r.guessed));
+    if (r.lost) lines.push(t.lost(r.lost));
+    if (r.note && t[r.note] && r.note !== "pieces") lines.push(t[r.note]);
+    if (r.note !== "kunjinkao") {
+      const conf = Math.max(0, Math.min(99, Math.round(50 + (r.after - r.before) * 15)));
+      lines.push(t.conf(conf, r.before.toFixed(2), r.after.toFixed(2)));
+    }
+    return [lines.join("\n"), r.guessed || r.lost ? "warn" : "ok"];
+  }
+  let fileInfo = "";
+  function run() {
+    const text = $("in").value;
+    if (!text.trim()) { $("out").value = ""; $("explain").textContent = ""; $("explain").className = ""; return; }
+    const r = luanma.fix(text);
+    $("out").value = r.fixed;
+    const [msg, cls] = explain(r, fileInfo);
+    $("explain").textContent = msg; $("explain").className = cls;
+  }
+  let timer;
+  $("in").addEventListener("input", () => { fileInfo = ""; $("download").classList.add("hidden"); clearTimeout(timer); timer = setTimeout(run, 150); });
+  $("clear").onclick = () => { $("in").value = ""; fileInfo = ""; run(); $("in").focus(); };
+  $("copy").onclick = async () => {
+    try { await navigator.clipboard.writeText($("out").value); } catch (e) { $("out").select(); document.execCommand("copy"); }
+    const b = $("copy"); b.textContent = T[lang].copied; setTimeout(() => (b.textContent = T[lang].copy), 1200);
+  };
+  $("download").onclick = () => {
+    const blob = new Blob(["\ufeff" + $("out").value], { type: "text/plain;charset=utf-8" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
+    a.download = (fileName || "fixed.txt").replace(/(\.[^.]+)?$/, ".fixed$1"); a.click();
+  };
+  document.querySelectorAll(".langs button").forEach((b) => (b.onclick = () => setLang(b.dataset.l)));
+  EXAMPLES.forEach((ex) => {
+    const b = document.createElement("button"); b.className = "chip"; b.textContent = ex.length > 14 ? ex.slice(0, 13) + "…" : ex;
+    b.onclick = () => { $("in").value = ex; fileInfo = ""; run(); }; $("examples").appendChild(b);
+  });
+
+  // files: pick the decoding that looks most like real text, then fix
+  async function openFile(f) {
+    const bytes = new Uint8Array(await f.arrayBuffer());
+    let bestT = null, bestS = -1e9, bestE = "";
+    for (const enc of ["utf-8", "gbk", "big5", "shift_jis", "euc_kr"]) {
+      let t;
+      try { t = luanma.decode(bytes, enc, false); } catch (e) { continue; }
+      const s = luanma.score(t.slice(0, 20000));
+      if (s > bestS + (enc === "utf-8" ? 0 : 0.3)) { bestT = t; bestS = s; bestE = luanma.LABEL[enc]; }
+    }
+    if (bestT === null) { bestT = luanma.decode(bytes, "utf-8", true); bestE = "UTF-8"; }
+    fileName = f.name; fileInfo = T[lang].file(f.name, bestE);
+    $("in").value = bestT.replace(/^\ufeff/, ""); run(); $("download").classList.remove("hidden");
+  }
+  const drop = $("drop");
+  drop.onclick = () => $("file").click();
+  $("file").onchange = (e) => e.target.files[0] && openFile(e.target.files[0]);
+  ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", (e) => e.dataTransfer.files[0] && openFile(e.dataTransfer.files[0]));
+  const q = new URLSearchParams(location.search).get("q");
+  if (q) $("in").value = q;
+  setLang(lang);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+Hello, world!
+The quick brown fox jumps over the lazy dog.
+Please find the attached report.
+Error: file not found (code 404)
+café crème brûlée
+Müller und Söhne GmbH
+naïve façade résumé
+¿Dónde está la biblioteca?
+São Paulo, Brasil
+Zürich Hauptbahnhof
+Привет, как дела?
+Καλημέρα κόσμε
+I ❤️ Unicode 🎉
+price: 25€ (incl. VAT)
+©2024 Example Inc. All rights reserved™
+def main(): print("hello")
+C:\Users\admin\Desktop\report.txt
+iPhone手机壳 USB-C接口
+测试test混合Mixed文本123
+Ελληνικά and English

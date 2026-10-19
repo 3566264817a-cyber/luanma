@@ -1,0 +1,22 @@
+场景                                   样本   含丢失字节     完全还原    字符准确率
+UTF-8 被当 GBK 读（Windows 记事本/Excel）   210     206       85%     99.1%
+UTF-8 被当 Windows-1252 读（网页/邮件）      468       0      100%    100.0%
+UTF-8 被当 Latin-1 读（数据库/接口）          200       0      100%    100.0%
+GBK 被当 Latin-1 读（MySQL latin1 字段）   200       0      100%    100.0%
+GBK 被当 CP437 读（Windows zip 文件名）     210       0      100%    100.0%
+GBK 被当 Big5 读（简体在繁体系统）              200      89       60%     93.1%
+Big5 被当 GBK 读（繁体在简体系统）               85       0      100%    100.0%
+UTF-8 被当 Big5 读                     120     120        0%     11.5%
+Shift-JIS 被当 GBK 读（日文游戏/软件）         146       0      100%    100.0%
+UTF-8 被当 Shift-JIS 读                146     146       39%     95.7%
+Shift-JIS 被当 CP437 读（日文 zip）        146       0       98%     98.2%
+EUC-KR 被当 GBK 读（韩文软件）               121       0       96%     98.0%
+UTF-8 被当 EUC-KR 读                   122     122        0%     53.5%
+两层：UTF-8→GBK 乱码两次                   200     116       78%     93.7%
+两层：UTF-8→Windows-1252 乱码两次          200       0      100%    100.0%
+合计                                 2774     799       82%     92.7%
+
+误伤测试：618 条正常文本，被错误修改 0 条（误伤率 0.0%）
+耗时 370.4s
+
+Web version (Chromium, web/bench_browser.cjs): exact 82.4%, same output as Python 99.4%, false positives 0/618
