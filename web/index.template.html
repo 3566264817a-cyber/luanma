@@ -3,8 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>luanma · 乱码克星 — CJK mojibake fixer</title>
+<title>luanma 乱码克星 — 在线修复中日韩乱码 · CJK mojibake fixer</title>
 <meta name="description" content="Fix Chinese / Japanese / Korean mojibake (乱码 / 文字化け / 깨진 글자) in your browser. Offline, nothing uploaded.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="luanma 乱码克星 — 把乱码变回人话">
+<meta property="og:description" content="浣犲ソ涓栫晫 → 你好世界. Paste garbled Chinese / Japanese / Korean text, get the original back. Runs offline in your browser.">
+<meta property="og:image" content="https://3566264817a-cyber.github.io/luanma/banner.png">
+<meta property="og:url" content="https://3566264817a-cyber.github.io/luanma/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://3566264817a-cyber.github.io/luanma/banner.png">
 <style>
   :root { --bg:#fafaf9; --fg:#1c1917; --mut:#78716c; --card:#fff; --line:#e7e5e4; --acc:#2563eb; --ok:#15803d; --warn:#b45309; }
   @media (prefers-color-scheme: dark) { :root { --bg:#1c1917; --fg:#f5f5f4; --mut:#a8a29e; --card:#292524; --line:#44403c; --acc:#60a5fa; --ok:#4ade80; --warn:#fbbf24; } }
@@ -69,7 +76,7 @@ __LUANMA_JS__
 <script>
 (function () {
   const T = {
-    zh: { tagline: "乱码克星", sub: "把「鏂囦欢」「æ–‡ä»¶」「╬─╝■」这类中日韩乱码还原成原文。自动识别出错的编码路径，支持多层乱码，并能推测部分已丢失的字节。",
+    zh: { tagline: "乱码克星 · 把乱码变回人话", sub: "把「鏂囦欢」「æ–‡ä»¶」「╬─╝■」这类中日韩乱码还原成原文。自动识别出错的编码路径，支持多层乱码，并能推测部分已丢失的字节。",
       input: "粘贴乱码", output: "还原结果", clear: "清空", copy: "复制", copied: "已复制", download: "下载 UTF-8 文件", examples: "试试：",
       drop: "或把乱码文件拖到这里（.txt / .csv / .srt …），自动识别编码并修复", privacy: "全部在你的浏览器本地运行，不上传任何内容",
       step: (a, b) => `${a} 编码的内容被当成 ${b} 解码`, nth: (i) => `第${i}次出错：`, guessed: (n) => `有 ${n} 个字节已丢失，已按常用字频率推测补回（请核对）`,
@@ -77,7 +84,7 @@ __LUANMA_JS__
       none: "没找到可靠的还原方式，原样保留。", pieces: (n) => `按片段修复了 ${n} 处乱码`, file: (n, e) => `文件「${n}」按 ${e} 读取`,
       kunjinkao: "「锟斤拷」：GBK 内容曾被当作 UTF-8 读取并保存，原始字节已被替换，丢失部分无法恢复。",
       tangtang: "「烫烫烫/屯屯屯」不是乱码：这是 VC++ 调试模式下未初始化的内存（0xCC / 0xCD）。" },
-    en: { tagline: "CJK mojibake fixer", sub: "Turns garbled Chinese / Japanese / Korean text (“æ–‡ä»¶”, “鏂囦欢”, “╬─╝■”) back into the original. Finds the chain of wrong decodings automatically, including multi-layer mojibake and lost bytes.",
+    en: { tagline: "turn mojibake back into text", sub: "Turns garbled Chinese / Japanese / Korean text (“æ–‡ä»¶”, “鏂囦欢”, “╬─╝■”) back into the original. Finds the chain of wrong decodings automatically, including multi-layer mojibake and lost bytes.",
       input: "Paste garbled text", output: "Fixed text", clear: "Clear", copy: "Copy", copied: "Copied", download: "Download as UTF-8", examples: "Try:",
       drop: "Or drop a garbled file here (.txt / .csv / .srt …) — encoding is detected and fixed", privacy: "Runs entirely in your browser. Nothing is uploaded",
       step: (a, b) => `${a} bytes were decoded as ${b}`, nth: (i) => `Error ${i}: `, guessed: (n) => `${n} lost byte(s) were guessed from character frequency (please double-check)`,
@@ -85,7 +92,7 @@ __LUANMA_JS__
       none: "No reliable fix found; text left unchanged.", pieces: (n) => `Fixed ${n} garbled fragment(s)`, file: (n, e) => `File "${n}" read as ${e}`,
       kunjinkao: "\"锟斤拷\": GBK text was once read as UTF-8 and saved; the original bytes were replaced and cannot be recovered.",
       tangtang: "\"烫烫烫 / 屯屯屯\" is not mojibake: it is uninitialised memory (0xCC / 0xCD) in MSVC debug builds." },
-    ja: { tagline: "文字化け修復", sub: "「縺薙ｓ縺ｫ縺｡縺ｯ」「ã“ã‚“」のような日中韓の文字化けを元の文字に戻します。誤変換の経路を自動で特定し、多重の文字化けや欠落バイトの推測にも対応。",
+    ja: { tagline: "文字化けを元の文字に", sub: "「縺薙ｓ縺ｫ縺｡縺ｯ」「ã“ã‚“」のような日中韓の文字化けを元の文字に戻します。誤変換の経路を自動で特定し、多重の文字化けや欠落バイトの推測にも対応。",
       input: "文字化けしたテキストを貼り付け", output: "修復結果", clear: "クリア", copy: "コピー", copied: "コピーしました", download: "UTF-8 で保存", examples: "例：",
       drop: "または文字化けしたファイルをここにドロップ（.txt / .csv / .srt …）", privacy: "すべてブラウザ内で処理され、何も送信されません",
       step: (a, b) => `${a} のデータが ${b} として読み込まれた`, nth: (i) => `誤り${i}：`, guessed: (n) => `失われた ${n} バイトを文字頻度から推測して補完（要確認）`,
